@@ -1,6 +1,23 @@
 [
   {
-    "url": "https://github.com/frappe/erpnext.git",
+    "name": "frappe",
+    "url": "https://github.com/alazab-group/frappe.git",
+    "branch": "version-15"
+  },
+  {
+    "name": "erpnext",
+    "url": "https://github.com/alazab-group/erpnext.git",
+    "branch": "version-15"
+  },
+  {
+    "name": "hrms",
+    "url": "https://github.com/alazab-group/hrms.git",
+    "branch": "version-15"
+  },
+  {
+    "name": "crm",
+    "url": "https://github.com/alazab-group/crm.git",
     "branch": "version-15"
   }
 ]
+
