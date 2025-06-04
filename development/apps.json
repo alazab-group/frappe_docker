@@ -1,0 +1,83 @@
+[
+  {
+    "name": "frappe",
+    "url": "https://github.com/alazab-group/frappe.git",
+    "branch": "main"
+  },
+  {
+    "name": "erpnext", 
+    "url": "https://github.com/alazab-group/erpnext.git",
+    "branch": "main"
+  },
+  {
+    "name": "hrms",
+    "url": "https://github.com/alazab-group/hrms.git", 
+    "branch": "main"
+  },
+  {
+    "name": "crm",
+    "url": "https://github.com/alazab-group/crm.git",
+    "branch": "main" 
+  },
+  {
+    "name": "mail",
+    "url": "https://github.com/alazab-group/mail.git",
+    "branch": "main"
+  },
+  {
+    "name": "drive", 
+    "url": "https://github.com/alazab-group/drive.git",
+    "branch": "main"
+  },
+  {
+    "name": "builder",
+    "url": "https://github.com/alazab-group/builder.git",
+    "branch": "main"
+  },
+  {
+    "name": "webshop",
+    "url": "https://github.com/alazab-group/webshop.git", 
+    "branch": "main"
+  },
+  {
+    "name": "books",
+    "url": "https://github.com/alazab-group/books.git",
+    "branch": "main"
+  },
+  {
+    "name": "studio", 
+    "url": "https://github.com/alazab-group/studio.git",
+    "branch": "main"
+  },
+  {
+    "name": "print_designer",
+    "url": "https://github.com/alazab-group/print_designer.git",
+    "branch": "main"
+  },
+  {
+    "name": "assets",
+    "url": "https://github.com/alazab-group/assets.git", 
+    "branch": "main"
+  },
+  {
+    "name": "design",
+    "url": "https://github.com/alazab-group/design.git",
+    "branch": "main"
+  },
+  {
+    "name": "translator", 
+    "url": "https://github.com/alazab-group/translator.git",
+    "branch": "main"
+  },
+  {
+    "name": "waba_integration",
+    "url": "https://github.com/alazab-group/waba_integration.git",
+    "branch": "main"
+  },
+  {
+    "name": "construction",
+    "url": "https://github.com/alazab-group/Construction.git",
+    "branch": "main"
+  }
+]
+
