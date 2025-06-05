@@ -1,7 +1,7 @@
 version: "3.9"
 
-x-frappe-defaults: &frappe_defaults
-  image: alazab/frappe-ecosystem:${ERPNEXT_VERSION:-v15.63.0}
+x-frappe-config: &frappe_config
+  image: alazab/frappe-ecosystem:${ERPNEXT_VERSION}
   restart: unless-stopped
   env_file: .env
   networks:
@@ -12,12 +12,12 @@ x-frappe-defaults: &frappe_defaults
     - /mnt/erpnext_data/repos:/home/frappe/frappe-bench/apps-custom
 
 services:
-  # ███████╗ 1. قاعدة البيانات ███████╗
+  # ███████╗ 1. خدمات البنية التحتية ███████╗
   db:
     image: mariadb:10.6
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-Admin123}
-      MYSQL_DATABASE: ${DB_NAME:-frappe}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     volumes:
       - alazab-db:/var/lib/mysql
     healthcheck:
@@ -28,7 +28,6 @@ services:
     networks:
       - alazab-network
 
-  # ███████╗ 2. خدمات Redis ███████╗
   redis-cache:
     image: redis:6.2-alpine
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
@@ -44,54 +43,45 @@ services:
     networks:
       - alazab-network
 
-  # ███████╗ 3. الخدمة الأساسية ███████╗
+  # ███████╗ 2. الخدمات الأساسية ███████╗
   backend:
-    <<: *frappe_defaults
+    <<: *frappe_config
     depends_on:
       db:
         condition: service_healthy
       redis-cache:
         condition: service_started
-    environment:
-      - SITE_NAME=${FRAPPE_SITE_NAME_HEADER:-erp.alazab.online}
-      - AUTO_MIGRATE=1
     command: bench start
 
-  # ███████╗ 4. واجهة الويب ███████╗
   frontend:
-    <<: *frappe_defaults
+    <<: *frappe_config
     ports:
-      - "${HTTP_PUBLISH_PORT:-80}:8080"
+      - "${HTTP_PUBLISH_PORT}:8080"
     command: nginx-entrypoint.sh
     environment:
       - BACKEND=backend:8000
       - SOCKETIO=websocket:9000
-      - UPSTREAM_REAL_IP_ADDRESS=${UPSTREAM_REAL_IP_ADDRESS:-0.0.0.0/0}
-      - UPSTREAM_REAL_IP_HEADER=${UPSTREAM_REAL_IP_HEADER:-X-Forwarded-For}
-      - PROXY_READ_TIMEOUT=${PROXY_READ_TIMEOUT:-300s}
-      - CLIENT_MAX_BODY_SIZE=${CLIENT_MAX_BODY_SIZE:-100m}
     depends_on:
       - backend
 
-  # ███████╗ 5. خدمات الخلفية ███████╗
+  websocket:
+    <<: *frappe_config
+    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
+
+  # ███████╗ 3. معالجة المهام ███████╗
   worker-short:
-    <<: *frappe_defaults
+    <<: *frappe_config
     command: bench worker --queue short,default
 
   worker-long:
-    <<: *frappe_defaults
+    <<: *frappe_config
     command: bench worker --queue long,default
 
   scheduler:
-    <<: *frappe_defaults
+    <<: *frappe_config
     command: bench schedule
 
-  # ███████╗ 6. WebSocket ███████╗
-  websocket:
-    <<: *frappe_defaults
-    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
-
-  # ███████╗ 7. النسخ الاحتياطي ███████╗
+  # ███████╗ 4. خدمات الإدارة ███████╗
   backup:
     image: alpine
     volumes:
@@ -104,13 +94,12 @@ services:
     depends_on:
       - backend
 
-  # ███████╗ 8. Certbot لـ HTTPS ███████╗
   certbot:
     image: certbot/certbot
     volumes:
       - alazab-sites:/var/www/html
       - /etc/letsencrypt:/etc/letsencrypt
-    command: certonly --webroot -w /var/www/html -d ${FRAPPE_SITE_NAME_HEADER:-erp.alazab.online} --email ${LETSENCRYPT_EMAIL:-admin@alazab.online} --agree-tos --non-interactive --keep-until-expiring
+    command: certonly --webroot -w /var/www/html -d ${FRAPPE_SITE_NAME_HEADER} --email ${LETSENCRYPT_EMAIL} --agree-tos --non-interactive --keep-until-expiring
     depends_on:
       - frontend
     networks:
