@@ -52,7 +52,8 @@ services:
       redis-cache:
         condition: service_started
     command: bench start
-
+    image: alazab-group/frappe_docker:${TAG:-latest}
+   
   frontend:
     <<: *frappe_config
     ports:
@@ -61,6 +62,9 @@ services:
     environment:
       - BACKEND=backend:8000
       - SOCKETIO=websocket:9000
+      - REDIS_CACHE_MAXMEMORY=512mb
+      - REDIS_QUEUE_MAXMEMORY=256mb
+      
     depends_on:
       - backend
 
