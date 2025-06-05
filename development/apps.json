@@ -66,114 +66,14 @@
     "name": "waba_integration",
     "url": "https://github.com/alazab-group/waba_integration.git",
     "branch": "main",
-    "priority": 2,
+    "priority": 1,
     "description": "تكامل واتساب للأعمال"
   },
   {
     "name": "builder",
     "url": "https://github.com/alazab-group/builder.git",
     "branch": "main",
-    "priority": 2,
+    "priority": 1,
     "description": "أداة بناء وتخصيص المكونات البرمجية"
-  },  
-  {
-    "name": "construction",
-    "url": "https://github.com/alazab-group/Construction.git",
-    "branch": "main",
-    "priority": 3,
-    "description": "إدارة المشاريع الإنشائية"
-  },
-  {
-    "name": "insights",
-    "url": "https://github.com/alazab-group/insights.git",
-    "branch": "main",
-    "priority": 3,
-    "description": "تحليلات وتقارير ذكية لإدارة الأعمال"
-  },
-  {
-    "name": "newsletter",
-    "url": "https://github.com/alazab-group/newsletter.git",
-    "branch": "main",
-    "priority": 3,
-    "description": "نظام إرسال النشرات البريدية"
-  },
-  {
-    "name": "email_delivery_service",
-    "url": "https://github.com/alazab-group/email_delivery_service.git",
-    "branch": "main",
-    "priority": 4,
-    "description": "خدمة توصيل الرسائل البريدية الموثوقة"
-  },
-  {
-    "name": "biometric-attendance-sync-tool",
-    "url": "https://github.com/alazab-group/biometric-attendance-sync-tool.git",
-    "branch": "main",
-    "priority": 4,
-    "description": "أداة مزامنة الحضور والانصراف من أجهزة البصمة"
-  },
-  {
-    "name": "changemakers_mobile",
-    "url": "https://github.com/alazab-group/changemakers_mobile.git",
-    "branch": "main",
-    "priority": 4,
-    "description": "تطبيق الجوال لمبادرة صناع التغيير"
-  },
-  {
-    "name": "mobile-apk",
-    "url": "https://github.com/alazab-group/mobile-apk.git",
-    "branch": "main",
-    "priority": 4,
-    "description": "ملفات التثبيت لتطبيقات الجوال"
-  },
-  {
-    "name": "gameplan",
-    "url": "https://github.com/alazab-group/gameplan.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "أداة تخطيط وتنفيذ استراتيجيات النمو"
-  },
-  {
-    "name": "books",
-    "url": "https://github.com/alazab-group/books.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "أدوات إدارة الكتب والمحتوى المعرفي"
-  },
-  {
-    "name": "agency-azab",
-    "url": "https://github.com/alazab-group/Agency-Azab.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "واجهة وكالة العزب للتسويق والخدمات"
-  },
-  {
-    "name": "stalwart",
-    "url": "https://github.com/alazab-group/stalwart.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "نظام أمني داخلي"
-  },
-  {
-    "name": "rq",
-    "url": "https://github.com/alazab-group/rq.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "نظام إدارة قوائم الانتظار والمهام الخلفية"
-  },
-  {
-    "name": "dashboard-react",
-    "url": "https://github.com/alazab-group/dashboard-react.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "لوحة تحكم عامة لجميع أنظمة الشركة"
-  },  
-  {
-    "name": "alazab-refinement",
-    "url": "https://github.com/alazab-group/alazab-refinement.git",
-    "branch": "main",
-    "priority": 5,
-    "description": "تحسينات وتخصيصات إضافية على أنظمة العزب"
   }
 ]
-
-
