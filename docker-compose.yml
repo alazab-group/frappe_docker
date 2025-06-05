@@ -1,50 +1,34 @@
 version: "3.9"
 
-# ███████╗ إعدادات مشتركة بين الخدمات ███████╗
-x-customizable-image: &customizable_image
-  image: ${DOCKER_IMAGE:-alazab/frappe-ecosystem}:${ERPNEXT_VERSION:-v15.63.0}
-  pull_policy: always
+x-frappe-defaults: &frappe_defaults
+  image: alazab/frappe-ecosystem:${ERPNEXT_VERSION:-v15.63.0}
   restart: unless-stopped
+  env_file: .env
   networks:
     - alazab-network
-
-x-backend-defaults: &backend_defaults
-  <<: *customizable_image
   volumes:
     - alazab-sites:/home/frappe/frappe-bench/sites
     - alazab-assets:/home/frappe/frappe-bench/sites/assets
     - /mnt/erpnext_data/repos:/home/frappe/frappe-bench/apps-custom
-  depends_on:
-    db:
-      condition: service_healthy
-    redis-cache:
-      condition: service_started
 
-# ███████╗ الخدمات الأساسية ███████╗
 services:
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❶ قاعدة البيانات (MariaDB)                     │
-  # └─────────────────────────────────────────────────┘
+  # ███████╗ 1. قاعدة البيانات ███████╗
   db:
     image: mariadb:10.6
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-Root@DBPass456!}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-Admin123}
       MYSQL_DATABASE: ${DB_NAME:-frappe}
-      MYSQL_USER: ${DB_USER:-frappe}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-Frappe@1234}
     volumes:
       - alazab-db:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - alazab-network
 
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❷ خدمة Redis                                   │
-  # └─────────────────────────────────────────────────┘
+  # ███████╗ 2. خدمات Redis ███████╗
   redis-cache:
     image: redis:6.2-alpine
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
@@ -60,84 +44,54 @@ services:
     networks:
       - alazab-network
 
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❸ الإعدادات الأولية (Configurator)             │
-  # └─────────────────────────────────────────────────┘
-  configurator:
-    <<: *backend_defaults
-    entrypoint: ["bash", "-c"]
-    command: >
-      echo "$$APPS_JSON_BASE64" | base64 -d > sites/apps.json &&
-      bench set-config -g db_host $$DB_HOST &&
-      bench set-config -gp db_port $$DB_PORT &&
-      bench set-config -g redis_cache "redis://$$REDIS_CACHE" &&
-      bench set-config -g redis_queue "redis://$$REDIS_QUEUE" &&
-      bench set-config -gp socketio_port $$SOCKETIO_PORT
-    environment:
-      APPS_JSON_BASE64: ${APPS_JSON_BASE64}
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-3306}
-      REDIS_CACHE: ${REDIS_CACHE:-redis-cache:6379}
-      REDIS_QUEUE: ${REDIS_QUEUE:-redis-queue:6379}
-      SOCKETIO_PORT: ${SOCKETIO_PORT:-9000}
-
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❹ الخدمة الرئيسية (Backend)                   │
-  # └─────────────────────────────────────────────────┘
+  # ███████╗ 3. الخدمة الأساسية ███████╗
   backend:
-    <<: *backend_defaults
-    command: bench start
+    <<: *frappe_defaults
     depends_on:
-      configurator:
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_started
+    environment:
+      - SITE_NAME=${FRAPPE_SITE_NAME_HEADER:-erp.alazab.online}
+      - AUTO_MIGRATE=1
+    command: bench start
 
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❺ واجهة الويب (Frontend)                      │
-  # └─────────────────────────────────────────────────┘
+  # ███████╗ 4. واجهة الويب ███████╗
   frontend:
-    <<: *customizable_image
+    <<: *frappe_defaults
     ports:
-      - "${HTTP_PORT:-8080}:8080"
+      - "${HTTP_PUBLISH_PORT:-80}:8080"
     command: nginx-entrypoint.sh
     environment:
-      BACKEND: backend:8000
-      SOCKETIO: websocket:9000
-      FRAPPE_SITE_NAME_HEADER: ${SITE_NAME:-alazab.online}
-      UPSTREAM_REAL_IP_ADDRESS: ${UPSTREAM_REAL_IP_ADDRESS:-127.0.0.1}
-      UPSTREAM_REAL_IP_HEADER: ${UPSTREAM_REAL_IP_HEADER:-X-Forwarded-For}
-      PROXY_READ_TIMEOUT: ${PROXY_READ_TIMEOUT:-300s}
-      CLIENT_MAX_BODY_SIZE: ${CLIENT_MAX_BODY_SIZE:-100m}
+      - BACKEND=backend:8000
+      - SOCKETIO=websocket:9000
+      - UPSTREAM_REAL_IP_ADDRESS=${UPSTREAM_REAL_IP_ADDRESS:-0.0.0.0/0}
+      - UPSTREAM_REAL_IP_HEADER=${UPSTREAM_REAL_IP_HEADER:-X-Forwarded-For}
+      - PROXY_READ_TIMEOUT=${PROXY_READ_TIMEOUT:-300s}
+      - CLIENT_MAX_BODY_SIZE=${CLIENT_MAX_BODY_SIZE:-100m}
     depends_on:
       - backend
-      - websocket
 
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❻ WebSocket                                   │
-  # └─────────────────────────────────────────────────┘
-  websocket:
-    <<: *customizable_image
-    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
-    depends_on:
-      - configurator
-
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❼ معالجة المهام في الخلفية                    │
-  # └─────────────────────────────────────────────────┘
+  # ███████╗ 5. خدمات الخلفية ███████╗
   worker-short:
-    <<: *backend_defaults
+    <<: *frappe_defaults
     command: bench worker --queue short,default
 
   worker-long:
-    <<: *backend_defaults
+    <<: *frappe_defaults
     command: bench worker --queue long,default
 
   scheduler:
-    <<: *backend_defaults
+    <<: *frappe_defaults
     command: bench schedule
 
-  # ┌─────────────────────────────────────────────────┐
-  # │ ❽ النسخ الاحتياطي التلقائي                    │
-  # └─────────────────────────────────────────────────┘
+  # ███████╗ 6. WebSocket ███████╗
+  websocket:
+    <<: *frappe_defaults
+    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
+
+  # ███████╗ 7. النسخ الاحتياطي ███████╗
   backup:
     image: alpine
     volumes:
@@ -150,7 +104,18 @@ services:
     depends_on:
       - backend
 
-# ███████╗ تعريف الشبكات والمجلدات ███████╗
+  # ███████╗ 8. Certbot لـ HTTPS ███████╗
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - alazab-sites:/var/www/html
+      - /etc/letsencrypt:/etc/letsencrypt
+    command: certonly --webroot -w /var/www/html -d ${FRAPPE_SITE_NAME_HEADER:-erp.alazab.online} --email ${LETSENCRYPT_EMAIL:-admin@alazab.online} --agree-tos --non-interactive --keep-until-expiring
+    depends_on:
+      - frontend
+    networks:
+      - alazab-network
+
 networks:
   alazab-network:
     driver: bridge
