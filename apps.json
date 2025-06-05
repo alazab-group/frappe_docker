@@ -3,77 +3,55 @@
     "name": "frappe",
     "url": "https://github.com/alazab-group/frappe.git",
     "branch": "main",
-    "priority": 1,
-    "description": "الإطار الأساسي المطلوب لتشغيل جميع التطبيقات"
   },
   {
     "name": "erpnext",
     "url": "https://github.com/alazab-group/erpnext.git",
     "branch": "main",
-    "priority": 1,
-    "description": "نظام ERP الأساسي"
   },
   {
     "name": "hrms",
     "url": "https://github.com/alazab-group/hrms.git",
     "branch": "main",
-    "priority": 1,
-    "description": "إدارة الموارد البشرية والرواتب"
   },
   {
     "name": "crm",
     "url": "https://github.com/alazab-group/crm.git",
     "branch": "main",
-    "priority": 1,
-    "description": "نظام إدارة علاقات العملاء"
   },
   {
     "name": "webshop",
     "url": "https://github.com/alazab-group/webshop.git",
     "branch": "main",
-    "priority": 1,
-    "description": "منصة التجارة الإلكترونية"
   },
   {
     "name": "drive",
     "url": "https://github.com/alazab-group/drive.git",
     "branch": "main",
-    "priority": 1,
-    "description": "تخزين ومشاركة الملفات"
   },
   {
     "name": "mail",
     "url": "https://github.com/alazab-group/mail.git",
     "branch": "main",
-    "priority": 1,
-    "description": "نظام البريد الإلكتروني"
   },
   {
     "name": "print_designer",
     "url": "https://github.com/alazab-group/print_designer.git",
     "branch": "main",
-    "priority": 1,
-    "description": "مصمم التقارير المرئي"
   },
    {
     "name": "helpdesk",
     "url": "https://github.com/alazab-group/helpdesk.git",
     "branch": "main",
-    "priority": 1,
-    "description": "نظام الدعم الفني وتذاكر العملاء"
   }, 
   {
     "name": "waba_integration",
     "url": "https://github.com/alazab-group/waba_integration.git",
     "branch": "main",
-    "priority": 1,
-    "description": "تكامل واتساب للأعمال"
   },
   {
     "name": "builder",
     "url": "https://github.com/alazab-group/builder.git",
     "branch": "main",
-    "priority": 1,
-    "description": "أداة بناء وتخصيص المكونات البرمجية"
   }
 ]
