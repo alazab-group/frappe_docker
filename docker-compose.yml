@@ -1,7 +1,7 @@
 version: "3.9"
 
 x-frappe-config: &frappe_config
-  image: alazab/frappe-ecosystem:${ERPNEXT_VERSION}
+  image: alazab-group/frappe_docker:${ERPNEXT_VERSION}
   restart: unless-stopped
   env_file: .env
   networks:
@@ -46,14 +46,17 @@ services:
   # ███████╗ 2. الخدمات الأساسية ███████╗
   backend:
     <<: *frappe_config
+    build:
+      context: .
+      args:
+        - ERPNEXT_VERSION=${ERPNEXT_VERSION}
     depends_on:
       db:
         condition: service_healthy
       redis-cache:
         condition: service_started
     command: bench start
-    image: alazab-group/frappe_docker:${TAG:-latest}
-   
+
   frontend:
     <<: *frappe_config
     ports:
@@ -62,9 +65,6 @@ services:
     environment:
       - BACKEND=backend:8000
       - SOCKETIO=websocket:9000
-      - REDIS_CACHE_MAXMEMORY=512mb
-      - REDIS_QUEUE_MAXMEMORY=256mb
-      
     depends_on:
       - backend
 
@@ -97,17 +97,6 @@ services:
     restart: on-failure
     depends_on:
       - backend
-
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - alazab-sites:/var/www/html
-      - /etc/letsencrypt:/etc/letsencrypt
-    command: certonly --webroot -w /var/www/html -d ${FRAPPE_SITE_NAME_HEADER} --email ${LETSENCRYPT_EMAIL} --agree-tos --non-interactive --keep-until-expiring
-    depends_on:
-      - frontend
-    networks:
-      - alazab-network
 
 networks:
   alazab-network:
