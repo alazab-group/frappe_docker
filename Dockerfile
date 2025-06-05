@@ -1,14 +1,25 @@
-# Dockerfile لبناء صورة مخصصة للـ frappe + apps
+# Dockerfile لبناء صورة ERPNext المخصصة
+FROM alpine:3.14 as builder
 
-FROM frappe/erpnext:${ERPNEXT_VERSION}
+# نسخ ملف التطبيقات
+COPY apps.json /tmp/apps.json
 
-LABEL maintainer="Alazab Tech <admin@alazab.online>"
+# تثبيت التبعيات الأساسية
+RUN apk add --no-cache git python3 py3-pip mariadb-client
 
-# تثبيت أدوات إضافية أو نسخ التطبيقات من المستودع الحالي
-COPY apps /home/frappe/frappe-bench/apps
+# إنشاء بيئة Frappe
+RUN python3 -m venv /venv && \
+    /venv/bin/pip install frappe-bench && \
+    bench init /frappe-bench --skip-assets && \
+    cd /frappe-bench && \
+    bench get-app frappe https://github.com/alazab-group/frappe.git && \
+    bench get-app erpnext https://github.com/alazab-group/erpnext.git
 
-# إعداد مسارات المواقع
-COPY sites /home/frappe/frappe-bench/sites
+# المرحلة النهائية
+FROM alazab/frappe-ecosystem:${ERPNEXT_VERSION}
 
-# تنفيذ الأمر الافتراضي
+# نسخ التطبيقات المبنية
+COPY --from=builder /frappe-bench /home/frappe/frappe-bench
+
+# تعيين الأمر الافتراضي
 CMD ["bench", "start"]
