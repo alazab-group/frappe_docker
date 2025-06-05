@@ -2,82 +2,178 @@
   {
     "name": "frappe",
     "url": "https://github.com/alazab-group/frappe.git",
-    "branch": "main"
+    "branch": "main",
+    "priority": 1,
+    "description": "الإطار الأساسي المطلوب لتشغيل جميع التطبيقات"
   },
   {
-    "name": "erpnext", 
+    "name": "erpnext",
     "url": "https://github.com/alazab-group/erpnext.git",
-    "branch": "main"
+    "branch": "main",
+    "priority": 1,
+    "description": "نظام ERP الأساسي"
   },
   {
     "name": "hrms",
-    "url": "https://github.com/alazab-group/hrms.git", 
-    "branch": "main"
+    "url": "https://github.com/alazab-group/hrms.git",
+    "branch": "main",
+    "priority": 1,
+    "description": "إدارة الموارد البشرية والرواتب"
   },
   {
     "name": "crm",
     "url": "https://github.com/alazab-group/crm.git",
-    "branch": "main" 
+    "branch": "main",
+    "priority": 1,
+    "description": "نظام إدارة علاقات العملاء"
+  },
+  {
+    "name": "webshop",
+    "url": "https://github.com/alazab-group/webshop.git",
+    "branch": "main",
+    "priority": 1,
+    "description": "منصة التجارة الإلكترونية"
+  },
+  {
+    "name": "drive",
+    "url": "https://github.com/alazab-group/drive.git",
+    "branch": "main",
+    "priority": 1,
+    "description": "تخزين ومشاركة الملفات"
   },
   {
     "name": "mail",
     "url": "https://github.com/alazab-group/mail.git",
-    "branch": "main"
-  },
-  {
-    "name": "drive", 
-    "url": "https://github.com/alazab-group/drive.git",
-    "branch": "main"
-  },
-  {
-    "name": "builder",
-    "url": "https://github.com/alazab-group/builder.git",
-    "branch": "main"
-  },
-  {
-    "name": "webshop",
-    "url": "https://github.com/alazab-group/webshop.git", 
-    "branch": "main"
-  },
-  {
-    "name": "books",
-    "url": "https://github.com/alazab-group/books.git",
-    "branch": "main"
-  },
-  {
-    "name": "studio", 
-    "url": "https://github.com/alazab-group/studio.git",
-    "branch": "main"
+    "branch": "main",
+    "priority": 1,
+    "description": "نظام البريد الإلكتروني"
   },
   {
     "name": "print_designer",
     "url": "https://github.com/alazab-group/print_designer.git",
-    "branch": "main"
+    "branch": "main",
+    "priority": 1,
+    "description": "مصمم التقارير المرئي"
   },
-  {
-    "name": "assets",
-    "url": "https://github.com/alazab-group/assets.git", 
-    "branch": "main"
-  },
-  {
-    "name": "design",
-    "url": "https://github.com/alazab-group/design.git",
-    "branch": "main"
-  },
-  {
-    "name": "translator", 
-    "url": "https://github.com/alazab-group/translator.git",
-    "branch": "main"
-  },
+   {
+    "name": "helpdesk",
+    "url": "https://github.com/alazab-group/helpdesk.git",
+    "branch": "main",
+    "priority": 1,
+    "description": "نظام الدعم الفني وتذاكر العملاء"
+  }, 
   {
     "name": "waba_integration",
     "url": "https://github.com/alazab-group/waba_integration.git",
-    "branch": "main"
+    "branch": "main",
+    "priority": 2,
+    "description": "تكامل واتساب للأعمال"
   },
+  {
+    "name": "builder",
+    "url": "https://github.com/alazab-group/builder.git",
+    "branch": "main",
+    "priority": 2,
+    "description": "أداة بناء وتخصيص المكونات البرمجية"
+  },  
   {
     "name": "construction",
     "url": "https://github.com/alazab-group/Construction.git",
-    "branch": "main"
+    "branch": "main",
+    "priority": 3,
+    "description": "إدارة المشاريع الإنشائية"
+  },
+  {
+    "name": "insights",
+    "url": "https://github.com/alazab-group/insights.git",
+    "branch": "main",
+    "priority": 3,
+    "description": "تحليلات وتقارير ذكية لإدارة الأعمال"
+  },
+  {
+    "name": "newsletter",
+    "url": "https://github.com/alazab-group/newsletter.git",
+    "branch": "main",
+    "priority": 3,
+    "description": "نظام إرسال النشرات البريدية"
+  },
+  {
+    "name": "email_delivery_service",
+    "url": "https://github.com/alazab-group/email_delivery_service.git",
+    "branch": "main",
+    "priority": 4,
+    "description": "خدمة توصيل الرسائل البريدية الموثوقة"
+  },
+  {
+    "name": "biometric-attendance-sync-tool",
+    "url": "https://github.com/alazab-group/biometric-attendance-sync-tool.git",
+    "branch": "main",
+    "priority": 4,
+    "description": "أداة مزامنة الحضور والانصراف من أجهزة البصمة"
+  },
+  {
+    "name": "changemakers_mobile",
+    "url": "https://github.com/alazab-group/changemakers_mobile.git",
+    "branch": "main",
+    "priority": 4,
+    "description": "تطبيق الجوال لمبادرة صناع التغيير"
+  },
+  {
+    "name": "mobile-apk",
+    "url": "https://github.com/alazab-group/mobile-apk.git",
+    "branch": "main",
+    "priority": 4,
+    "description": "ملفات التثبيت لتطبيقات الجوال"
+  },
+  {
+    "name": "gameplan",
+    "url": "https://github.com/alazab-group/gameplan.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "أداة تخطيط وتنفيذ استراتيجيات النمو"
+  },
+  {
+    "name": "books",
+    "url": "https://github.com/alazab-group/books.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "أدوات إدارة الكتب والمحتوى المعرفي"
+  },
+  {
+    "name": "agency-azab",
+    "url": "https://github.com/alazab-group/Agency-Azab.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "واجهة وكالة العزب للتسويق والخدمات"
+  },
+  {
+    "name": "stalwart",
+    "url": "https://github.com/alazab-group/stalwart.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "نظام أمني داخلي"
+  },
+  {
+    "name": "rq",
+    "url": "https://github.com/alazab-group/rq.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "نظام إدارة قوائم الانتظار والمهام الخلفية"
+  },
+  {
+    "name": "dashboard-react",
+    "url": "https://github.com/alazab-group/dashboard-react.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "لوحة تحكم عامة لجميع أنظمة الشركة"
+  },  
+  {
+    "name": "alazab-refinement",
+    "url": "https://github.com/alazab-group/alazab-refinement.git",
+    "branch": "main",
+    "priority": 5,
+    "description": "تحسينات وتخصيصات إضافية على أنظمة العزب"
   }
 ]
+
 
