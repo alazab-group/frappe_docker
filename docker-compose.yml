@@ -1,111 +1,76 @@
-version: "3.9"
-
-x-frappe-config: &frappe_config
-  image: alazab-group/frappe_docker:${ERPNEXT_VERSION}
-  restart: unless-stopped
-  env_file: .env
-  networks:
-    - alazab-network
-  volumes:
-    - alazab-sites:/home/frappe/frappe-bench/sites
-    - alazab-assets:/home/frappe/frappe-bench/sites/assets
-    - /mnt/erpnext_data/repos:/home/frappe/frappe-bench/apps-custom
-
+version: '3.8'
 services:
-  # ███████╗ 1. خدمات البنية التحتية ███████╗
-  db:
-    image: mariadb:10.6
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-    volumes:
-      - alazab-db:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      - alazab-network
-
-  redis-cache:
-    image: redis:6.2-alpine
-    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
-    volumes:
-      - alazab-redis-cache:/data
-    networks:
-      - alazab-network
-
-  redis-queue:
-    image: redis:6.2-alpine
-    volumes:
-      - alazab-redis-queue:/data
-    networks:
-      - alazab-network
-
-  # ███████╗ 2. الخدمات الأساسية ███████╗
   backend:
-    <<: *frappe_config
-    build:
-      context: .
-      args:
-        - ERPNEXT_VERSION=${ERPNEXT_VERSION}
+    image: frappe/erpnext:v15.x.x
+    restart: unless-stopped
+    environment:
+      - DB_HOST=db
+      - REDIS_CACHE=redis-cache:6379
+      - REDIS_QUEUE=redis-queue:6379
+      - MYSQL_ROOT_PASSWORD=admin123
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - alazab
     depends_on:
-      db:
-        condition: service_healthy
-      redis-cache:
-        condition: service_started
-    command: bench start
+      - db
 
   frontend:
-    <<: *frappe_config
-    ports:
-      - "${HTTP_PUBLISH_PORT}:8080"
-    command: nginx-entrypoint.sh
+    image: frappe/erpnext:v15.x.x
+    restart: unless-stopped
+    command: ["nginx-entrypoint.sh"]
     environment:
       - BACKEND=backend:8000
-      - SOCKETIO=websocket:9000
-    depends_on:
-      - backend
-
-  websocket:
-    <<: *frappe_config
-    command: ["node", "/home/frappe/frappe-bench/apps/frappe/socketio.js"]
-
-  # ███████╗ 3. معالجة المهام ███████╗
-  worker-short:
-    <<: *frappe_config
-    command: bench worker --queue short,default
-
-  worker-long:
-    <<: *frappe_config
-    command: bench worker --queue long,default
-
-  scheduler:
-    <<: *frappe_config
-    command: bench schedule
-
-  # ███████╗ 4. خدمات الإدارة ███████╗
-  backup:
-    image: alpine
+      - FRAPPE_SITE_NAME_HEADER=alazab.online
     volumes:
-      - alazab-sites:/source
-      - /mnt/erpnext_data/backups:/backup
-    command: >
-      sh -c "tar czf /backup/backup-$$(date +'%Y%m%d').tar.gz /source &&
-      find /backup -name '*.tar.gz' -mtime +7 -delete"
-    restart: on-failure
+      - sites:/home/frappe/frappe-bench/sites
+    ports:
+      - "8080:8080"
+    networks:
+      - alazab
     depends_on:
       - backend
 
-networks:
-  alazab-network:
-    driver: bridge
-    name: alazab-network
+  db:
+    image: mariadb:10.6
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin123
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - alazab
+
+  redis-cache:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - alazab
+
+  redis-queue:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - alazab
+
+  create-site:
+    image: frappe/erpnext:v15.x.x
+    restart: "no"
+    command: |
+      bash -c "
+        sleep 60
+        bench new-site alazab.online --admin-password Admin123 --db-root-password admin123 --install-app erpnext --set-default
+      "
+    volumes:
+      - sites:/home/frappe/frappe-bench/sites
+    networks:
+      - alazab
+    depends_on:
+      - db
 
 volumes:
-  alazab-sites:
-  alazab-assets:
-  alazab-db:
-  alazab-redis-cache:
-  alazab-redis-queue:
+  sites:
+  db-data:
+
+networks:
+  alazab:
