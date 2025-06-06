@@ -2,12 +2,12 @@
   {
     "name": "frappe",
     "url": "https://github.com/alazab-group/frappe.git",
-    "branch": "main"
+    "branch": "15.63"
   },
   {
     "name": "erpnext",
     "url": "https://github.com/alazab-group/erpnext.git",
-    "branch": "main"
+    "branch": "15.63"
   },
   {
     "name": "hrms",
