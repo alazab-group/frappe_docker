@@ -1,5 +1,7 @@
-# مرحلة البناء (Builder)
-FROM alpine:3.14 as builder
+# ──────────────────────────────────────────────────────────────
+# المرحلة الأولى: إعداد بيئة البناء (builder)
+# ──────────────────────────────────────────────────────────────
+FROM alpine:3.14 AS builder
 
 # تثبيت التبعيات الأساسية
 RUN apk add --no-cache \
@@ -10,53 +12,49 @@ RUN apk add --no-cache \
     gcc \
     musl-dev \
     python3-dev \
-    mariadb-dev
+    mariadb-dev \
+    jq
 
-# إنشاء بيئة افتراضية وتهيئة Bench
+# تهيئة البيئة الافتراضية وbench
 RUN python3 -m venv /venv && \
     /venv/bin/pip install --upgrade pip && \
     /venv/bin/pip install frappe-bench
 
-# تهيئة بيئة Frappe (بدون أصول)
-RUN bench init /frappe-bench \
+# إنشاء مشروع frappe-bench
+ARG FRAPPE_VERSION=version-15
+RUN /venv/bin/bench init /frappe-bench \
     --skip-assets \
-    --frappe-branch ${FRAPPE_VERSION:-version-14} \
-    --frappe-path https://github.com/alazab-group/frappe.git && \
-    cd /frappe-bench
+    --frappe-branch ${FRAPPE_VERSION}
 
-# تثبيت التطبيقات الأساسية من مستودعات Alazab
-RUN cd /frappe-bench && \
-    bench get-app erpnext \
-    https://github.com/alazab-group/erpnext.git \
-    --branch ${ERPNEXT_VERSION:-version-14}
+# نسخ ملف التطبيقات المخصصة
+COPY apps.json /frappe-bench/apps.json
 
-# نسخ ملف apps.json ومعالجة التطبيقات الإضافية
-COPY apps.json /tmp/apps.json
-RUN cd /frappe-bench && \
-    jq -c '.[]' /tmp/apps.json | while read app; do \
-        name=$(echo "$app" | jq -r '.name'); \
-        url=$(echo "$app" | jq -r '.url'); \
-        branch=$(echo "$app" | jq -r '.branch // "main"'); \
-        if [ "$name" != "frappe" ] && [ "$name" != "erpnext" ]; then \
-            bench get-app "$name" "$url" --branch "$branch"; \
-        fi; \
-    done
+# تحميل التطبيقات من apps.json (عدا frappe وerpnext)
+WORKDIR /frappe-bench
+RUN jq -c '.[]' apps.json | while read app; do \
+    name=$(echo "$app" | jq -r '.name'); \
+    url=$(echo "$app" | jq -r '.url'); \
+    branch=$(echo "$app" | jq -r '.branch // "main"'); \
+    if [ "$name" != "frappe" ] && [ "$name" != "erpnext" ]; then \
+        /venv/bin/bench get-app "$name" "$url" --branch "$branch"; \
+    fi; \
+done
 
-# المرحلة النهائية
-FROM alazab-group/frappe_docker:${ERPNEXT_VERSION:-version-14}
+# ──────────────────────────────────────────────────────────────
+# المرحلة الثانية: إنشاء صورة التشغيل النهائية
+# ──────────────────────────────────────────────────────────────
+FROM frappe/erpnext:${ERPNEXT_VERSION:-version-15}
 
-# نسخ البيئة المبنية
+# نسخ التطبيقات والبيئة الافتراضية من مرحلة البناء
 COPY --from=builder /frappe-bench/apps /home/frappe/frappe-bench/apps
 COPY --from=builder /venv /home/frappe/venv
 
-# تعيين أذونات المستخدم
+# تعيين الصلاحيات
 RUN chown -R frappe:frappe /home/frappe
 
-# متغيرات بيئية إضافية
-ENV PATH="/home/frappe/venv/bin:$PATH" \
-    FRAPPE_VERSION=${FRAPPE_VERSION:-version-14} \
-    ERPNEXT_VERSION=${ERPNEXT_VERSION:-version-14}
+# إعداد البيئة
+ENV PATH="/home/frappe/venv/bin:$PATH"
 
-# نقطة الدخول
-ENTRYPOINT ["/home/frappe/venv/bin/bench"]
-CMD ["start"]
+# نقطة التشغيل (افتراضيًا لا يتم تشغيل أمر bench هنا)
+ENTRYPOINT ["/bin/bash"]
+
