@@ -1,76 +1,81 @@
 version: '3.8'
-services:
-  backend:
-    image: frappe/erpnext:v15.x.x
-    restart: unless-stopped
-    environment:
-      - DB_HOST=db
-      - REDIS_CACHE=redis-cache:6379
-      - REDIS_QUEUE=redis-queue:6379
-      - MYSQL_ROOT_PASSWORD=admin123
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - alazab
-    depends_on:
-      - db
 
-  frontend:
-    image: frappe/erpnext:v15.x.x
-    restart: unless-stopped
-    command: ["nginx-entrypoint.sh"]
-    environment:
-      - BACKEND=backend:8000
-      - FRAPPE_SITE_NAME_HEADER=alazab.online
+services:
+  redis-cache:
+    image: redis:6.2-alpine
+    restart: always
     volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    ports:
-      - "8080:8080"
+      - redis-cache-data:/data
     networks:
-      - alazab
-    depends_on:
+      - backend
+
+  redis-queue:
+    image: redis:6.2-alpine
+    restart: always
+    volumes:
+      - redis-queue-data:/data
+    networks:
       - backend
 
   db:
     image: mariadb:10.6
-    restart: unless-stopped
+    restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=admin123
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
     volumes:
       - db-data:/var/lib/mysql
+      - ./config/mariadb:/etc/mysql/conf.d
     networks:
-      - alazab
+      - backend
 
-  redis-cache:
-    image: redis:7-alpine
-    restart: unless-stopped
-    networks:
-      - alazab
-
-  redis-queue:
-    image: redis:7-alpine
-    restart: unless-stopped
-    networks:
-      - alazab
-
-  create-site:
-    image: frappe/erpnext:v15.x.x
-    restart: "no"
-    command: |
-      bash -c "
-        sleep 60
-        bench new-site alazab.online --admin-password Admin123 --db-root-password admin123 --install-app erpnext --set-default
-      "
-    volumes:
-      - sites:/home/frappe/frappe-bench/sites
-    networks:
-      - alazab
+  erpnext:
+    build:
+      context: .
+      args:
+        - FRAPPE_PATH=https://github.com/alazab-group/frappe.git
+        - FRAPPE_VERSION=${FRAPPE_VERSION}
+    restart: always
     depends_on:
       - db
+      - redis-cache
+      - redis-queue
+    volumes:
+      - sites-data:/home/frappe/frappe-bench/sites
+      - apps-data:/home/frappe/frappe-bench/apps
+      - ./apps:/home/frappe/frappe-bench/apps-local
+    environment:
+      - SITE_NAME=${SITE_NAME}
+      - DB_ROOT_USER=root
+      - DB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - INSTALL_APPS=${INSTALL_APPS}
+    networks:
+      - backend
+      - frontend
+
+  nginx:
+    image: nginx:1.21-alpine
+    restart: always
+    depends_on:
+      - erpnext
+    volumes:
+      - ./nginx-conf:/etc/nginx/conf.d
+      - sites-data:/usr/share/nginx/html/sites
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - frontend
 
 volumes:
-  sites:
   db-data:
+  redis-cache-data:
+  redis-queue-data:
+  sites-data:
+  apps-data:
 
 networks:
-  alazab:
+  backend:
+  frontend:
