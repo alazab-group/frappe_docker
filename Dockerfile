@@ -1,60 +1,68 @@
 # ──────────────────────────────────────────────────────────────
-# المرحلة الأولى: إعداد بيئة البناء (builder)
+# Dockerfile للتطبيقات المخصصة - العزب جروب
 # ──────────────────────────────────────────────────────────────
-FROM alpine:3.14 AS builder
 
-# تثبيت التبعيات الأساسية
-RUN apk add --no-cache \
+ARG ERPNEXT_VERSION=v15.63.0
+ARG FRAPPE_VERSION=v15.63.0
+
+# استخدام الصورة الرسمية كقاعدة
+FROM frappe/erpnext:${ERPNEXT_VERSION}
+
+# التبديل للمستخدم root لتثبيت التبعيات
+USER root
+
+# تثبيت الأدوات المطلوبة
+RUN apt-get update && apt-get install -y \
+    jq \
+    curl \
     git \
-    python3 \
-    py3-pip \
-    mariadb-client \
-    gcc \
-    musl-dev \
-    python3-dev \
-    mariadb-dev \
-    jq
+    && rm -rf /var/lib/apt/lists/*
 
-# تهيئة البيئة الافتراضية وbench
-RUN python3 -m venv /venv && \
-    /venv/bin/pip install --upgrade pip && \
-    /venv/bin/pip install frappe-bench
+# التبديل للمستخدم frappe
+USER frappe
 
-# إنشاء مشروع frappe-bench
-ARG FRAPPE_VERSION=version-15
-RUN /venv/bin/bench init /frappe-bench \
-    --skip-assets \
-    --frappe-branch ${FRAPPE_VERSION}
+# تعيين مجلد العمل
+WORKDIR /home/frappe/frappe-bench
 
-# نسخ ملف التطبيقات المخصصة
-COPY apps.json /frappe-bench/apps.json
+# نسخ ملف التطبيقات
+COPY --chown=frappe:frappe apps.json ./
 
-# تحميل التطبيقات من apps.json (عدا frappe وerpnext)
-WORKDIR /frappe-bench
-RUN jq -c '.[]' apps.json | while read app; do \
-    name=$(echo "$app" | jq -r '.name'); \
-    url=$(echo "$app" | jq -r '.url'); \
-    branch=$(echo "$app" | jq -r '.branch // "main"'); \
-    if [ "$name" != "frappe" ] && [ "$name" != "erpnext" ]; then \
-        /venv/bin/bench get-app "$name" "$url" --branch "$branch"; \
-    fi; \
-done
+# تحميل التطبيقات المخصصة
+RUN set -e && \
+    # قراءة وتحميل كل تطبيق من apps.json
+    jq -r '.[] | @base64' apps.json | while read app; do \
+        APP_DATA=$(echo "$app" | base64 -d); \
+        APP_NAME=$(echo "$APP_DATA" | jq -r '.name'); \
+        APP_URL=$(echo "$APP_DATA" | jq -r '.url'); \
+        APP_BRANCH=$(echo "$APP_DATA" | jq -r '.branch // "main"'); \
+        \
+        # تخطي frappe وerpnext لأنهما موجودان بالفعل
+        if [ "$APP_NAME" != "frappe" ] && [ "$APP_NAME" != "erpnext" ]; then \
+            echo "تحميل تطبيق: $APP_NAME من $APP_URL (فرع: $APP_BRANCH)"; \
+            bench get-app --branch="$APP_BRANCH" "$APP_NAME" "$APP_URL" || { \
+                echo "فشل في تحميل $APP_NAME، المحاولة بفرع main"; \
+                bench get-app "$APP_NAME" "$APP_URL"; \
+            }; \
+        fi; \
+    done
 
-# ──────────────────────────────────────────────────────────────
-# المرحلة الثانية: إنشاء صورة التشغيل النهائية
-# ──────────────────────────────────────────────────────────────
-FROM frappe/erpnext:${ERPNEXT_VERSION:-version-15}
+# تنظيف ملفات .git لتوفير المساحة
+RUN find apps -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true
 
-# نسخ التطبيقات والبيئة الافتراضية من مرحلة البناء
-COPY --from=builder /frappe-bench/apps /home/frappe/frappe-bench/apps
-COPY --from=builder /venv /home/frappe/venv
+# إنشاء قائمة التطبيقات
+RUN ls -1 apps > sites/apps.txt
 
 # تعيين الصلاحيات
-RUN chown -R frappe:frappe /home/frappe
+USER root
+RUN chown -R frappe:frappe /home/frappe/frappe-bench
+USER frappe
 
-# إعداد البيئة
-ENV PATH="/home/frappe/venv/bin:$PATH"
+# متغيرات البيئة
+ENV PYTHONPATH=/home/frappe/frappe-bench/apps
+ENV PATH=/home/frappe/frappe-bench/env/bin:$PATH
 
-# نقطة التشغيل (افتراضيًا لا يتم تشغيل أمر bench هنا)
-ENTRYPOINT ["/bin/bash"]
+# Volume للمواقع
+VOLUME ["/home/frappe/frappe-bench/sites"]
 
+# أمر التشغيل الافتراضي
+CMD ["gunicorn", "--chdir=/home/frappe/frappe-bench/sites", "--bind=0.0.0.0:8000", "--threads=4", "--workers=2", "--worker-class=gthread", "--worker-tmp-dir=/dev/shm", "--timeout=120", "--preload", "frappe.app:application"]
