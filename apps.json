@@ -2,12 +2,12 @@
   {
     "name": "frappe",
     "url": "https://github.com/alazab-group/frappe.git",
-    "branch": "15.63"
+    "branch": "version-15"
   },
   {
-    "name": "erpnext",
+    "name": "erpnext", 
     "url": "https://github.com/alazab-group/erpnext.git",
-    "branch": "15.63"
+    "branch": "version-15"
   },
   {
     "name": "hrms",
@@ -16,7 +16,7 @@
   },
   {
     "name": "crm",
-    "url": "https://github.com/alazab-group/crm.git",
+    "url": "https://github.com/alazab-group/crm.git", 
     "branch": "main"
   },
   {
@@ -39,14 +39,24 @@
     "url": "https://github.com/alazab-group/print_designer.git",
     "branch": "main"
   },
-   {
+  {
     "name": "helpdesk",
     "url": "https://github.com/alazab-group/helpdesk.git",
     "branch": "main"
-  }, 
+  },
   {
-    "name": "waba_integration",
+    "name": "waba_integration", 
     "url": "https://github.com/alazab-group/waba_integration.git",
+    "branch": "main"
+  },
+  {
+    "name": "erpnext_price_estimation", 
+    "url": "https://github.com/alazab-group/erpnext_price_estimation.git",
+    "branch": "main"
+  },
+  {
+    "name": "email_delivery_service", 
+    "url": "https://github.com/alazab-group/email_delivery_service.git",
     "branch": "main"
   },
   {
@@ -54,9 +64,9 @@
     "url": "https://github.com/alazab-group/builder.git",
     "branch": "main"
   },
-    {
+  {
     "name": "alazab-refinement",
-    "url": "https://github.com/alazab-group/alazab-refinement.git",
+    "url": "https://github.com/alazab-group/alazab-refinement.git", 
     "branch": "main"
   }
 ]
