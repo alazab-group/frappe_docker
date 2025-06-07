@@ -43,7 +43,7 @@ services:
         echo "✅ تم إعداد البيئة بنجاح";
     environment:
       DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-3306}
+      DB_PORT: ${DB_PORT:-3307}
       REDIS_CACHE: ${REDIS_CACHE:-redis-cache:6379}
       REDIS_QUEUE: ${REDIS_QUEUE:-redis-queue:6379}
       SOCKETIO_PORT: 9000
@@ -102,7 +102,7 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
     ports:
-      - "${HTTP_PUBLISH_PORT:-80}:8080"
+      - "${HTTP_PUBLISH_PORT:-8080}"
     depends_on:
       - backend
       - websocket
