@@ -18,7 +18,3 @@ expect eof' > /tmp/install_apps.exp && chmod +x /tmp/install_apps.exp
 RUN cd frappe-bench && \
     bench get-app --resolve-deps hrms https://github.com/alazab-group/hrms.git && \
     /tmp/install_apps.exp
-EOF
-
-# بناء بالطريقة المبسطة
-docker build -f Dockerfile.alazab -t alazab-custom:latest .
