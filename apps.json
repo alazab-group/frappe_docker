@@ -10,6 +10,11 @@
     "branch": "version-15"
   },
   {
+    "name": "gunicorn",
+    "url": "https://github.com/alazab-group/gunicorn.git",
+    "branch": "main"
+  },  
+  {
     "name": "hrms",
     "url": "https://github.com/alazab-group/hrms.git",
     "branch": "main"
@@ -65,8 +70,8 @@
     "branch": "main"
   },
   {
-    "name": "alazab-refinement",
-    "url": "https://github.com/alazab-group/alazab-refinement.git", 
+    "name": "gameplan",
+    "url": "https://github.com/alazab-group/gameplan.git", 
     "branch": "main"
   }
 ]
