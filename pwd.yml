@@ -2,25 +2,16 @@ version: "3"
 
 services:
   backend:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: on-failure
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
-    environment:
-      DB_HOST: db
-      DB_PORT: "3306"
-      MYSQL_ROOT_PASSWORD: admin
-      MARIADB_ROOT_PASSWORD: admin
 
   configurator:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: none
@@ -31,25 +22,30 @@ services:
       - >
         ls -1 apps > sites/apps.txt;
         bench set-config -g db_host $$DB_HOST;
-        bench set-config -gp db_port $$DB_PORT;
-        bench set-config -g redis_cache "redis://$$REDIS_CACHE";
-        bench set-config -g redis_queue "redis://$$REDIS_QUEUE";
-        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE";
-        bench set-config -gp socketio_port $$SOCKETIO_PORT;
+        bench set-config -g redis_cache "redis://redis:6379/0";
+        bench set-config -g redis_queue "redis://redis:6379/1";
+        bench set-config -g redis_socketio "redis://redis:6379/2";
+        bench set-config -g developer_mode 1;
+        bench set-config -g server_script_enabled true;
+        bench set-config -g disable_website_cache true;
+        bench set-config -g company_name "Alazab Construction & Engineering";
+        bench set-config -g default_currency "EGP";
+        bench set-config -g default_country "Egypt";
+        bench new-site alazab.local --no-mariadb-socket --mariadb-root-password admin123 --admin-password admin123;
+        bench --site alazab.local install-app erpnext;
+        bench --site alazab.local install-app hrms;
+        bench --site alazab.local install-app books;
+        bench --site alazab.local install-app crm;
+        bench --site alazab.local install-app helpdesk;
+        bench --site alazab.local install-app erpnext_price_estimation;
     environment:
       DB_HOST: db
-      DB_PORT: "3306"
-      REDIS_CACHE: redis-cache:6379
-      REDIS_QUEUE: redis-queue:6379
-      SOCKETIO_PORT: "9000"
     volumes:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
 
   create-site:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: none
@@ -62,8 +58,7 @@ services:
     command:
       - >
         wait-for-it -t 120 db:3306;
-        wait-for-it -t 120 redis-cache:6379;
-        wait-for-it -t 120 redis-queue:6379;
+        wait-for-it -t 120 redis:6379;
         export start=`date +%s`;
         until [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".db_host // empty"` ]] && \
           [[ -n `grep -hs ^ sites/common_site_config.json | jq -r ".redis_cache // empty"` ]] && \
@@ -77,36 +72,16 @@ services:
           fi
         done;
         echo "sites/common_site_config.json found";
-        bench new-site --mariadb-user-host-login-scope='%' --admin-password=admin --db-root-username=root --db-root-password=admin --install-app erpnext --set-default frontend;
-
-  db:
-    image: mariadb:10.6
-    networks:
-      - frappe_network
-    healthcheck:
-      test: mysqladmin ping -h localhost --password=admin
-      interval: 1s
-      retries: 20
-    deploy:
-      restart_policy:
-        condition: on-failure
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --skip-character-set-client-handshake
-      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
-    environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MARIADB_ROOT_PASSWORD: admin
-    volumes:
-      - db-data:/var/lib/mysql
+        bench new-site alazab.local --no-mariadb-socket --mariadb-root-password admin123 --admin-password admin123;
+        bench --site alazab.local install-app erpnext;
+        bench --site alazab.local install-app hrms;
+        bench --site alazab.local install-app books;
+        bench --site alazab.local install-app crm;
+        bench --site alazab.local install-app helpdesk;
+        bench --site alazab.local install-app erpnext_price_estimation;
 
   frontend:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
-    depends_on:
-      - websocket
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: on-failure
@@ -114,7 +89,7 @@ services:
       - nginx-entrypoint.sh
     environment:
       BACKEND: backend:8000
-      FRAPPE_SITE_NAME_HEADER: frontend
+      FRAPPE_SITE_NAME_HEADER: alazab.local
       SOCKETIO: websocket:9000
       UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
@@ -122,15 +97,13 @@ services:
       PROXY_READ_TIMEOUT: 120
       CLIENT_MAX_BODY_SIZE: 50m
     volumes:
-      - sites:/home/frappe/frappe-bench/sites
-      - logs:/home/frappe/frappe-bench/logs
+      - sites:/usr/share/nginx/html/sites
+      - logs:/var/log/nginx
     ports:
       - "8080:8080"
 
   queue-long:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: on-failure
@@ -144,9 +117,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   queue-short:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: on-failure
@@ -159,28 +130,16 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
 
-  redis-queue:
-    image: redis:6.2-alpine
-    networks:
-      - frappe_network
+  redis:
+    image: redis:7-alpine
     deploy:
       restart_policy:
         condition: on-failure
     volumes:
-      - redis-queue-data:/data
-
-  redis-cache:
-    image: redis:6.2-alpine
-    networks:
-      - frappe_network
-    deploy:
-      restart_policy:
-        condition: on-failure
+      - redis-data:/data
 
   scheduler:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: on-failure
@@ -192,9 +151,7 @@ services:
       - logs:/home/frappe/frappe-bench/logs
 
   websocket:
-    image: frappe/erpnext:v15.63.0
-    networks:
-      - frappe_network
+    image: frappe/erpnext:v15.64.1
     deploy:
       restart_policy:
         condition: on-failure
@@ -205,12 +162,26 @@ services:
       - sites:/home/frappe/frappe-bench/sites
       - logs:/home/frappe/frappe-bench/logs
 
+  db:
+    image: mariadb:10.11
+    deploy:
+      restart_policy:
+        condition: on-failure
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+      - --innodb-buffer-pool-size=512M
+      - --max-allowed-packet=256M
+      - --max-connections=200
+    environment:
+      MYSQL_ROOT_PASSWORD: admin123
+    volumes:
+      - db-data:/var/lib/mysql
+
 volumes:
   db-data:
-  redis-queue-data:
+  redis-data:
   sites:
   logs:
-
-networks:
-  frappe_network:
-    driver: bridge
