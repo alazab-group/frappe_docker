@@ -1,0 +1,64 @@
+{
+  "db_name": "crm_alazab_local",
+  "db_password": "admin123",
+  "db_type": "mariadb",
+  "encryption_key": "",
+  "host_name": "http://crm.alazab.local:8080",
+  "install_apps": [
+    "frappe",
+    "crm",
+    "helpdesk",
+    "drive"
+  ],
+  "limits": {
+    "expiry": null,
+    "support": null,
+    "users": null,
+    "space": null,
+    "emails": null
+  },
+  "maintenance_mode": false,
+  "pause_scheduler": false,
+  "developer_mode": 0,
+  "disable_website_cache": false,
+  "server_script_enabled": true,
+  "allow_tests": false,
+  "mute_emails": false,
+  "enable_scheduler": true,
+  "background_workers": 1,
+  "logging": 1,
+  "log_level": "INFO",
+  "company_settings": {
+    "company_name": "Alazab CRM Division",
+    "company_abbr": "ACD",
+    "domain": "Services",
+    "country": "Egypt",
+    "currency": "EGP",
+    "timezone": "Africa/Cairo"
+  },
+  "regional_settings": {
+    "date_format": "dd-mm-yyyy",
+    "time_format": "HH:mm:ss",
+    "number_format": "#,###.##",
+    "float_precision": 3,
+    "currency_precision": 2,
+    "language": "en"
+  },
+  "email_settings": {
+    "mail_server": "",
+    "mail_login": "",
+    "mail_password": "",
+    "mail_port": 587,
+    "use_tls": true,
+    "use_ssl": false,
+    "auto_email_reports": true,
+    "email_sync_option": "ALL",
+    "enable_auto_reply": true
+  },
+  "backup_settings": {
+    "backup_limit": 5,
+    "encrypt_backup": false,
+    "backup_path": "",
+    "remote_backup": false
+  }
+}
