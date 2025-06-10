@@ -1,0 +1,71 @@
+{
+  "db_name": "alazab_local",
+  "db_password": "admin123",
+  "db_type": "mariadb",
+  "encryption_key": "",
+  "host_name": "http://alazab.local:8080",
+  "install_apps": [
+    "frappe",
+    "erpnext", 
+    "crm",
+    "hrms",
+    "helpdesk",
+    "webshop",
+    "drive",
+    "insights",
+    "books",
+    "print_designer",
+    "erpnext_price_estimation"
+  ],
+  "limits": {
+    "expiry": null,
+    "support": null,
+    "users": null,
+    "space": null,
+    "emails": null
+  },
+  "maintenance_mode": false,
+  "pause_scheduler": false,
+  "developer_mode": 1,
+  "disable_website_cache": true,
+  "server_script_enabled": true,
+  "allow_tests": true,
+  "mute_emails": false,
+  "enable_scheduler": true,
+  "background_workers": 1,
+  "logging": 1,
+  "log_level": "INFO",
+  "company_settings": {
+    "company_name": "Alazab Construction & Engineering",
+    "company_abbr": "ACE",
+    "domain": "Construction",
+    "country": "Egypt",
+    "currency": "EGP",
+    "timezone": "Africa/Cairo"
+  },
+  "regional_settings": {
+    "date_format": "dd-mm-yyyy",
+    "time_format": "HH:mm:ss", 
+    "number_format": "#,###.##",
+    "float_precision": 3,
+    "currency_precision": 2,
+    "language": "en"
+  },
+  "email_settings": {
+    "mail_server": "",
+    "mail_login": "",
+    "mail_password": "",
+    "mail_port": 587,
+    "use_tls": true,
+    "use_ssl": false,
+    "auto_email_reports": false,
+    "email_sync_option": "UNSEEN",
+    "enable_auto_reply": false
+  },
+  "backup_settings": {
+    "backup_limit": 3,
+    "encrypt_backup": false,
+    "backup_path": "",
+    "remote_backup": false
+  }
+}
